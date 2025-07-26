@@ -1,0 +1,26 @@
+{
+  "name": "evm-contract-scanner",
+  "version": "1.0.0",
+  "description": "A JavaScript tool to scan EVM blockchain for newly created contracts",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "frontend": "node start.js",
+    "security-audit": "npm audit",
+    "security-fix": "npm audit fix",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["ethereum", "blockchain", "contract", "scanner", "evm"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "ethers": "^6.8.1",
+    "sqlite3": "^5.1.6",
+    "ws": "^8.14.2",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
