@@ -35,13 +35,17 @@ export function NotificationProvider({ children }) {
     const [state, dispatch] = useReducer(notificationReducer, initialState);
 
     const addNotification = (notification) => {
-        dispatch({ type: 'ADD_NOTIFICATION', payload: notification });
+        const notificationWithId = { ...notification, id: notification.id || Date.now() };
+        dispatch({ type: 'ADD_NOTIFICATION', payload: notificationWithId });
 
         // Auto-remove after 5 seconds for non-persistent notifications
-        if (!notification.persistent) {
-            setTimeout(() => {
-                dispatch({ type: 'REMOVE_NOTIFICATION', payload: notification.id || Date.now() });
-            }, notification.duration || 5000);
+        if (!notificationWithId.persistent) {
+            const timeoutId = setTimeout(() => {
+                dispatch({ type: 'REMOVE_NOTIFICATION', payload: notificationWithId.id });
+            }, notificationWithId.duration || 5000);
+
+            // Store timeout ID for potential cleanup
+            notificationWithId.timeoutId = timeoutId;
         }
     };
 

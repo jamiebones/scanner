@@ -94,8 +94,11 @@ class EthereumProvider {
             await this.initializeWebSocket();
         } catch (error) {
             logger.error('WebSocket reconnection failed', { error: error.message });
-            // Retry after delay
-            setTimeout(() => this.reconnectWebSocket(), 5000);
+            // Retry after delay with cleanup tracking
+            this.reconnectTimeout = setTimeout(() => {
+                this.reconnectTimeout = null;
+                this.reconnectWebSocket();
+            }, 5000);
         }
     }
 
@@ -320,6 +323,12 @@ class EthereumProvider {
 
     async disconnect() {
         try {
+            // Clear any pending reconnection timeout
+            if (this.reconnectTimeout) {
+                clearTimeout(this.reconnectTimeout);
+                this.reconnectTimeout = null;
+            }
+
             if (this.wsProvider) {
                 await this.wsProvider.destroy();
                 this.wsProvider = null;

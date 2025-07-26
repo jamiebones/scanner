@@ -3,6 +3,7 @@ const ContractDetector = require('./ContractDetector');
 const Database = require('../storage/Database');
 const config = require('../../config/config');
 const logger = require('../utils/Logger');
+const { memoryMonitor } = require('../utils/MemoryMonitor');
 
 class BlockScanner {
     constructor() {
@@ -68,6 +69,9 @@ class BlockScanner {
         try {
             this.isRunning = true;
             this.stats.startTime = Date.now();
+
+            // Start memory monitoring
+            memoryMonitor.startMonitoring();
 
             logger.scannerStart(this.networkConfig, this.scannerConfig.scanMode);
 
@@ -386,6 +390,15 @@ class BlockScanner {
         this.isPaused = false;
 
         try {
+            // Clear heartbeat interval
+            if (this.heartbeatInterval) {
+                clearInterval(this.heartbeatInterval);
+                this.heartbeatInterval = null;
+            }
+
+            // Stop memory monitoring
+            memoryMonitor.stopMonitoring();
+
             // Disconnect providers
             if (this.provider) {
                 await this.provider.disconnect();
@@ -436,7 +449,7 @@ class BlockScanner {
 
     keepAlive() {
         // Keep the process alive for real-time scanning
-        setInterval(() => {
+        this.heartbeatInterval = setInterval(() => {
             if (this.isRunning && !this.isPaused) {
                 logger.debug('Scanner heartbeat', this.getStats());
             }
